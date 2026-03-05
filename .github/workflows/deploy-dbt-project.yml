@@ -25,7 +25,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test:
+  dbt-validate:
     runs-on: ubuntu-latest
 
     env:
@@ -58,8 +58,8 @@ jobs:
             --state artifacts \
             --select state:modified,test_type:unit
 
-  run:
-    needs: test
+  dbt-run:
+    needs: dbt-validate
     runs-on: ubuntu-latest
 
     env:
@@ -91,8 +91,8 @@ jobs:
       - name: Run Modified Models
         run: uv run dbt run --defer --state artifacts --select state:modified
 
-  upload-assets:
-    needs: run
+  dbt-upload-assets:
+    needs: dbt-run
     runs-on: ubuntu-latest
 
     env:
@@ -122,7 +122,6 @@ jobs:
         run: |
           uv run dbt docs generate \
             --static \
-            --no-compile \
             --defer \
             --state artifacts \
             --select state:modified
@@ -140,8 +139,8 @@ jobs:
             target/manifest.json \
             ${{ inputs.gcp-artifacts-bucket }}/target/manifest.json
 
-  deploy:
-    needs: run
+  dbt-deploy:
+    needs: dbt-run
     runs-on: ubuntu-latest
 
     env:
