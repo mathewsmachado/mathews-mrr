@@ -69,4 +69,3 @@ WORKDIR /app
 
 # Configure execution
 ENTRYPOINT ["dbt"]
-CMD ["--help"]
