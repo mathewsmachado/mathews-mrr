@@ -15,7 +15,7 @@ jobs:
       gcp-workload-identity-provider: projects/489693200516/locations/global/workloadIdentityPools/github/providers/mathews-mrr
       gcp-service-account: evidence@mathews-mrr-prd.iam.gserviceaccount.com
       vercel-org-id: team_moFeFBoZI7YgB3mRzRw4hNuX
-      vercel-project-id: prj_knazEU4aBhRcKyKe7y3zOqjtJdyh
+      vercel-project-id: prj_uH37bahmmyDOotiB1XnKTP6nyzwA
       vercel-project-name: mathews-mrr-prd
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
