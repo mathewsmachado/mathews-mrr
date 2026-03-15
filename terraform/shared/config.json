@@ -31,6 +31,7 @@
       "display_name": "dbt-project",
       "description": "DBT Project Service Account",
       "roles": [
+        "roles/artifactregistry.writer",
         "roles/bigquery.dataEditor",
         "roles/bigquery.user",
         "roles/iam.serviceAccountAdmin",

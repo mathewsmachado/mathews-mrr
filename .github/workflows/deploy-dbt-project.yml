@@ -131,11 +131,15 @@ jobs:
 
       - name: Generate Docs
         run: |
-          uv run dbt docs generate \
-            --static \
-            --defer \
-            --state artifacts \
-            --select state:modified
+          if [ ! -f artifacts/manifest.json ]; then
+            uv run dbt docs generate --static
+          else
+            uv run dbt docs generate \
+              --static \
+              --defer \
+              --state artifacts \
+              --select state:modified
+          fi
 
       - name: Upload Docs
         run: |
