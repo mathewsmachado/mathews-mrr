@@ -36,6 +36,7 @@
         "roles/bigquery.user",
         "roles/iam.serviceAccountAdmin",
         "roles/iam.serviceAccountTokenCreator",
+        "roles/iam.serviceAccountUser",
         "roles/run.developer",
         "roles/storage.objectAdmin"
       ]
