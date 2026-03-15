@@ -50,10 +50,14 @@ jobs:
 
       - name: Run Unit Tests
         run: |
-          uv run dbt test \
-            --defer \
-            --state artifacts \
-            --select state:modified,test_type:unit
+          if [ ! -f artifacts/manifest.json ]; then
+            uv run dbt test
+          else
+            uv run dbt test \
+              --defer \
+              --state artifacts \
+              --select state:modified,test_type:unit
+          fi
 
   dbt-run:
     needs: dbt-validate
@@ -83,10 +87,20 @@ jobs:
           gcp-artifacts-bucket-prd: ${{ inputs.gcp-artifacts-bucket-prd }}
 
       - name: Run Modified Seeds
-        run: uv run dbt seed --defer --state artifacts --select state:modified
+        run: |
+          if [ ! -f artifacts/manifest.json ]; then
+            uv run dbt seed
+          else
+            uv run dbt seed --defer --state artifacts --select state:modified
+          fi
 
       - name: Run Modified Models
-        run: uv run dbt run --defer --state artifacts --select state:modified
+        run: |
+          if [ ! -f artifacts/manifest.json ]; then
+            uv run dbt run
+          else
+            uv run dbt run --defer --state artifacts --select state:modified
+          fi
 
   dbt-upload-assets:
     needs: dbt-run
