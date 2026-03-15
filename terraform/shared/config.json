@@ -35,7 +35,9 @@
         "roles/bigquery.dataEditor",
         "roles/bigquery.user",
         "roles/iam.serviceAccountAdmin",
-        "roles/iam.serviceAccountTokenCreator"
+        "roles/iam.serviceAccountTokenCreator",
+        "roles/run.developer",
+        "roles/storage.objectAdmin"
       ]
     },
     "evidence": {
