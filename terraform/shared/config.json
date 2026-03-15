@@ -45,6 +45,7 @@
       "display_name": "evidence",
       "description": "Evidence Service Account",
       "roles": [
+        "roles/bigquery.dataViewer",
         "roles/bigquery.user",
         "roles/iam.serviceAccountTokenCreator"
       ]
