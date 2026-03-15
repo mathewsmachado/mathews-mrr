@@ -34,8 +34,6 @@
         "roles/artifactregistry.writer",
         "roles/bigquery.dataEditor",
         "roles/bigquery.user",
-        "roles/iam.serviceAccountAdmin",
-        "roles/iam.serviceAccountTokenCreator",
         "roles/iam.serviceAccountUser",
         "roles/run.developer",
         "roles/storage.objectAdmin"
@@ -46,9 +44,7 @@
       "display_name": "evidence",
       "description": "Evidence Service Account",
       "roles": [
-        "roles/bigquery.user",
-        "roles/iam.serviceAccountAdmin",
-        "roles/iam.serviceAccountTokenCreator"
+        "roles/bigquery.user"
       ]
     }
   }
