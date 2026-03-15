@@ -33,6 +33,7 @@
       "roles": [
         "roles/bigquery.dataEditor",
         "roles/bigquery.user",
+        "roles/iam.serviceAccountAdmin",
         "roles/iam.serviceAccountTokenCreator"
       ]
     },
@@ -42,6 +43,7 @@
       "description": "Evidence Service Account",
       "roles": [
         "roles/bigquery.user",
+        "roles/iam.serviceAccountAdmin",
         "roles/iam.serviceAccountTokenCreator"
       ]
     }
