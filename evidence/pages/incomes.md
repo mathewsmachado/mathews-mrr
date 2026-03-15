@@ -206,7 +206,7 @@ order by
 </div>
 <LineBreak/>
 
-<div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+<div class='grid grid-cols-1 xl:grid-cols-2 gap-4'>
     <BarChart
         title='NVpY'
         subtitle='Net Value per Year'
