@@ -160,6 +160,8 @@ main() {
     parse_args "$@"
     check_dependencies "gcloud"
 
+    "$SCRIPT_DIR/gcp-config.sh" -p "$PROJECT_ID"
+
     log_info "Setting up Terraform for project ${PROJECT_ID} (account: ${ACCOUNT_ID})"
 
     enable_credentials_api

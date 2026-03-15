@@ -21,5 +21,5 @@ provider "google" {
 
 locals {
   shared     = jsondecode(file("../../shared/config.json"))
-  wif_member = "principalSet://iam.googleapis.com/projects/489693200516/locations/global/workloadIdentityPools/github/attribute.repository/mathewsmachado/mathews-recurring-revenue"
+  wif_member = "principalSet://iam.googleapis.com/projects/489693200516/locations/global/workloadIdentityPools/github/attribute.repository/mathewsmachado/mathews-mrr"
 }
