@@ -1,0 +1,19 @@
+name: Deploy dbt Project Staging
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - dbt_project/**
+
+jobs:
+  dbt-project-deploy-stg:
+    uses: ./.github/workflows/dbt-project-deploy.yml
+    environment: stg
+    with:
+      gcp-project-id: ${{ vars.GCP_PROJECT_ID }}
+      gcp-workload-identity-provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+      gcp-service-account: ${{ vars.GCP_DBT_PROJECT_SERVICE_ACCOUNT }}
+      gcp-artifacts-bucket: ${{ vars.GCP_ARTIFACTS_BUCKET }}
+      gcp-artifacts-bucket-prd: ${{ vars.GCP_ARTIFACTS_BUCKET_PRD }}

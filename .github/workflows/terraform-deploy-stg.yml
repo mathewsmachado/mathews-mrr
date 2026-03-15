@@ -1,0 +1,20 @@
+name: Deploy Terraform Staging
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - terraform/modules/**
+      - terraform/shared/**
+      - terraform/projects/mathews-mrr-stg/**
+
+jobs:
+  deploy-terraform-stg:
+    uses: ./.github/workflows/terraform-deploy.yml
+    environment: stg
+    with:
+      gcp-project-id: ${{ vars.GCP_PROJECT_ID }}
+      gcp-workload-identity-provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+      gcp-service-account: ${{ vars.GCP_TERRAFORM_SERVICE_ACCOUNT }}
+      terraform-project: ${{ vars.TERRAFORM_PROJECT }}
