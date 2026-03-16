@@ -16,7 +16,7 @@ jobs:
 
     env:
       GCP_PROJECT: ${{ vars.GCP_PROJECT_ID }}
-      GCP_CLIENT_EMAIL: ${{ vars.GCP_DBT_PROJECT_SERVICE_ACCOUNT }}
+      GCP_CLIENT_EMAIL: ${{ vars.GCP_SERVICE_ACCOUNT_DBT_PROJECT }}
 
     permissions:
       contents: read
@@ -34,7 +34,7 @@ jobs:
         with:
           gcp-project-id: ${{ vars.GCP_PROJECT_ID }}
           gcp-workload-identity-provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          gcp-service-account: ${{ vars.GCP_DBT_PROJECT_SERVICE_ACCOUNT }}
+          gcp-service-account: ${{ vars.GCP_SERVICE_ACCOUNT_DBT_PROJECT }}
           gcp-artifacts-bucket-prd: ${{ vars.GCP_ARTIFACTS_BUCKET_PRD }}
 
       - name: Run Unit Tests
@@ -55,7 +55,7 @@ jobs:
 
     env:
       GCP_PROJECT: ${{ vars.GCP_PROJECT_ID }}
-      GCP_CLIENT_EMAIL: ${{ vars.GCP_DBT_PROJECT_SERVICE_ACCOUNT }}
+      GCP_CLIENT_EMAIL: ${{ vars.GCP_SERVICE_ACCOUNT_DBT_PROJECT }}
 
     permissions:
       contents: read
@@ -73,7 +73,7 @@ jobs:
         with:
           gcp-project-id: ${{ vars.GCP_PROJECT_ID }}
           gcp-workload-identity-provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          gcp-service-account: ${{ vars.GCP_DBT_PROJECT_SERVICE_ACCOUNT }}
+          gcp-service-account: ${{ vars.GCP_SERVICE_ACCOUNT_DBT_PROJECT }}
           gcp-artifacts-bucket-prd: ${{ vars.GCP_ARTIFACTS_BUCKET_PRD }}
 
       - name: Run Modified Seeds
@@ -92,14 +92,14 @@ jobs:
             uv run dbt run --defer --state artifacts --select state:modified
           fi
 
-  dbt-upload-assets:
+  dbt-docs-deploy:
     needs: dbt-run
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
 
     env:
       GCP_PROJECT: ${{ vars.GCP_PROJECT_ID }}
-      GCP_CLIENT_EMAIL: ${{ vars.GCP_DBT_PROJECT_SERVICE_ACCOUNT }}
+      GCP_CLIENT_EMAIL: ${{ vars.GCP_SERVICE_ACCOUNT_DBT_PROJECT }}
 
     permissions:
       contents: read
@@ -117,7 +117,7 @@ jobs:
         with:
           gcp-project-id: ${{ vars.GCP_PROJECT_ID }}
           gcp-workload-identity-provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          gcp-service-account: ${{ vars.GCP_DBT_PROJECT_SERVICE_ACCOUNT }}
+          gcp-service-account: ${{ vars.GCP_SERVICE_ACCOUNT_DBT_PROJECT }}
           gcp-artifacts-bucket-prd: ${{ vars.GCP_ARTIFACTS_BUCKET_PRD }}
 
       - name: Generate Docs
@@ -127,32 +127,29 @@ jobs:
           else
             uv run dbt docs generate \
               --static \
+              --no-compile \
               --defer \
               --state artifacts \
               --select state:modified
           fi
 
-      - name: Upload Docs
-        run: |
-          gcloud storage cp \
-            target/static_index.html \
-            ${{ vars.GCP_ARTIFACTS_BUCKET }}/target/static_index.html
+      - name: Deploy to Vercel
+        uses: ./.github/actions/vercel-deploy
+        with:
+          dir-path: dbt_project/target
+          vercel-org-id: ${{ vars.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ vars.VERCEL_PROJECT_ID_DBT_DOCS }}
+          vercel-project-name: ${{ vars.VERCEL_PROJECT_NAME_DBT_DOCS }}
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
 
-      - name: Upload manifest.json
-        if: vars.GCP_ARTIFACTS_BUCKET == vars.GCP_ARTIFACTS_BUCKET_PRD
-        run: |
-          gcloud storage cp \
-            target/manifest.json \
-            ${{ vars.GCP_ARTIFACTS_BUCKET }}/target/manifest.json
-
-  dbt-deploy:
+  dbt-project-deploy:
     needs: dbt-run
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
 
     env:
       GCP_PROJECT: ${{ vars.GCP_PROJECT_ID }}
-      GCP_CLIENT_EMAIL: ${{ vars.GCP_DBT_PROJECT_SERVICE_ACCOUNT }}
+      GCP_CLIENT_EMAIL: ${{ vars.GCP_SERVICE_ACCOUNT_DBT_PROJECT }}
 
     permissions:
       contents: read
@@ -170,7 +167,7 @@ jobs:
         with:
           gcp-project-id: ${{ vars.GCP_PROJECT_ID }}
           gcp-workload-identity-provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          gcp-service-account: ${{ vars.GCP_DBT_PROJECT_SERVICE_ACCOUNT }}
+          gcp-service-account: ${{ vars.GCP_SERVICE_ACCOUNT_DBT_PROJECT }}
 
       - name: Get GCP access token
         id: gcp-token
@@ -202,9 +199,16 @@ jobs:
       - name: Deploy to Cloud Run
         run: |
           DOCKER_IMAGE=${{ steps.docker-metadata.outputs.image }} \
-          GCP_SERVICE_ACCOUNT=${{ vars.GCP_DBT_PROJECT_SERVICE_ACCOUNT }} \
+          GCP_SERVICE_ACCOUNT=${{ vars.GCP_SERVICE_ACCOUNT_DBT_PROJECT }} \
           envsubst < job.yaml |
           gcloud run jobs replace \
           --project=${{ env.GCP_PROJECT }} \
           --region=us-central1 \
           -
+
+      - name: Upload manifest.json
+        if: vars.GCP_ARTIFACTS_BUCKET == vars.GCP_ARTIFACTS_BUCKET_PRD
+        run: |
+          gcloud storage cp \
+            target/manifest.json \
+            ${{ vars.GCP_ARTIFACTS_BUCKET }}/target/manifest.json

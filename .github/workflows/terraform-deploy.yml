@@ -36,7 +36,7 @@ jobs:
         with:
           gcp-project-id: ${{ vars.GCP_PROJECT_ID }}
           gcp-workload-identity-provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          gcp-service-account: ${{ vars.GCP_TERRAFORM_SERVICE_ACCOUNT }}
+          gcp-service-account: ${{ vars.GCP_SERVICE_ACCOUNT_TERRAFORM }}
           terraform-project: ${{ vars.TERRAFORM_PROJECT }}
           terraform-version: ${{ env.terraform-version }}
 
@@ -78,7 +78,7 @@ jobs:
         with:
           gcp-project-id: ${{ vars.GCP_PROJECT_ID }}
           gcp-workload-identity-provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          gcp-service-account: ${{ vars.GCP_TERRAFORM_SERVICE_ACCOUNT }}
+          gcp-service-account: ${{ vars.GCP_SERVICE_ACCOUNT_TERRAFORM }}
           terraform-project: ${{ vars.TERRAFORM_PROJECT }}
           terraform-version: ${{ env.terraform-version }}
 
@@ -128,7 +128,7 @@ jobs:
         with:
           gcp-project-id: ${{ vars.GCP_PROJECT_ID }}
           gcp-workload-identity-provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          gcp-service-account: ${{ vars.GCP_TERRAFORM_SERVICE_ACCOUNT }}
+          gcp-service-account: ${{ vars.GCP_SERVICE_ACCOUNT_TERRAFORM }}
           terraform-project: ${{ vars.TERRAFORM_PROJECT }}
           terraform-version: ${{ env.terraform-version }}
 

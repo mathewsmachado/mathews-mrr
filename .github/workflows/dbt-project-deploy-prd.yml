@@ -12,3 +12,5 @@ jobs:
     uses: ./.github/workflows/dbt-project-deploy.yml
     with:
       environment: prd
+    secrets:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
