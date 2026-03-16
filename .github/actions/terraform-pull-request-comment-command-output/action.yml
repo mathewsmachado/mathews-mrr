@@ -1,4 +1,4 @@
-name: Comment Terraform Command Output on Pull Request
+name: Terraform Comment Command Output on Pull Request
 description: Comment Terraform Command Output on Pull Request
 author: Mathews Machado
 

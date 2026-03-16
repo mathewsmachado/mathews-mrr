@@ -1,4 +1,4 @@
-name: Setup Terraform on Google Cloud Platform
+name: Terraform Google Cloud Platform Setup
 description: Authenticate to GCP, Install and Initialize Terraform
 author: Mathews Machado
 
@@ -22,7 +22,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: ./.github/actions/authenticate-to-gcp
+    - uses: ./.github/actions/gcp-authenticate
       with:
         gcp-project-id: ${{ inputs.gcp-project-id }}
         gcp-workload-identity-provider: ${{ inputs.gcp-workload-identity-provider }}

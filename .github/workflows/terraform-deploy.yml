@@ -40,7 +40,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Setup Terraform on Google Cloud Platform
-        uses: ./.github/actions/setup-terraform-on-gcp
+        uses: ./.github/actions/terraform-gcp-setup
         with:
           gcp-project-id: ${{ inputs.gcp-project-id }}
           gcp-workload-identity-provider: ${{ inputs.gcp-workload-identity-provider }}
@@ -53,7 +53,7 @@ jobs:
         run: terraform validate -no-color
 
       - name: Comment Terraform Validate Output on Pull Request
-        uses: ./.github/actions/comment-terraform-command-output-on-pull-request
+        uses: ./.github/actions/terraform-pull-request-comment-command-output
         if: always()
         with:
           terraform-project: ${{ inputs.terraform-project }}
@@ -81,7 +81,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Setup Terraform on Google Cloud Platform
-        uses: ./.github/actions/setup-terraform-on-gcp
+        uses: ./.github/actions/terraform-gcp-setup
         with:
           gcp-project-id: ${{ inputs.gcp-project-id }}
           gcp-workload-identity-provider: ${{ inputs.gcp-workload-identity-provider }}
@@ -101,7 +101,7 @@ jobs:
           retention-days: ${{ env.terraform-plan-file-retention-days }}
 
       - name: Comment Terraform Plan Output on Pull Request
-        uses: ./.github/actions/comment-terraform-command-output-on-pull-request
+        uses: ./.github/actions/terraform-pull-request-comment-command-output
         if: always()
         with:
           terraform-project: ${{ inputs.terraform-project }}
@@ -131,7 +131,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Setup Terraform on Google Cloud Platform
-        uses: ./.github/actions/setup-terraform-on-gcp
+        uses: ./.github/actions/terraform-gcp-setup
         with:
           gcp-project-id: ${{ inputs.gcp-project-id }}
           gcp-workload-identity-provider: ${{ inputs.gcp-workload-identity-provider }}
@@ -150,7 +150,7 @@ jobs:
         run: terraform apply -no-color -auto-approve ${{ inputs.gcp-project-id }}
 
       - name: Comment Terraform Apply Output on Pull Request
-        uses: ./.github/actions/comment-terraform-command-output-on-pull-request
+        uses: ./.github/actions/terraform-pull-request-comment-command-output
         if: always()
         with:
           terraform-project: ${{ inputs.terraform-project }}

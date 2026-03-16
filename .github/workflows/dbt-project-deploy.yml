@@ -41,7 +41,7 @@ jobs:
       - name: Clone Repository
         uses: actions/checkout@v5
 
-      - uses: ./.github/actions/setup-dbt-on-gcp
+      - uses: ./.github/actions/dbt-gcp-setup
         with:
           gcp-project-id: ${{ inputs.gcp-project-id }}
           gcp-workload-identity-provider: ${{ inputs.gcp-workload-identity-provider }}
@@ -79,7 +79,7 @@ jobs:
       - name: Clone Repository
         uses: actions/checkout@v5
 
-      - uses: ./.github/actions/setup-dbt-on-gcp
+      - uses: ./.github/actions/dbt-gcp-setup
         with:
           gcp-project-id: ${{ inputs.gcp-project-id }}
           gcp-workload-identity-provider: ${{ inputs.gcp-workload-identity-provider }}
@@ -122,7 +122,7 @@ jobs:
       - name: Clone Repository
         uses: actions/checkout@v5
 
-      - uses: ./.github/actions/setup-dbt-on-gcp
+      - uses: ./.github/actions/dbt-gcp-setup
         with:
           gcp-project-id: ${{ inputs.gcp-project-id }}
           gcp-workload-identity-provider: ${{ inputs.gcp-workload-identity-provider }}
@@ -174,7 +174,7 @@ jobs:
       - name: Clone Repository
         uses: actions/checkout@v5
 
-      - uses: ./.github/actions/authenticate-to-gcp
+      - uses: ./.github/actions/gcp-authenticate
         with:
           gcp-project-id: ${{ inputs.gcp-project-id }}
           gcp-workload-identity-provider: ${{ inputs.gcp-workload-identity-provider }}
