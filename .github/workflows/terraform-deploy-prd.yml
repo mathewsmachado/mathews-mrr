@@ -12,9 +12,5 @@ on:
 jobs:
   deploy-terraform-prd:
     uses: ./.github/workflows/terraform-deploy.yml
-    environment: prd
     with:
-      gcp-project-id: ${{ vars.GCP_PROJECT_ID }}
-      gcp-workload-identity-provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-      gcp-service-account: ${{ vars.GCP_TERRAFORM_SERVICE_ACCOUNT }}
-      terraform-project: ${{ vars.TERRAFORM_PROJECT }}
+      environment: prd

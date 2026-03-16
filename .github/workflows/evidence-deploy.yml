@@ -1,43 +1,29 @@
 on:
   workflow_call:
     inputs:
-      gcp-project-id:
+      environment:
         required: true
         type: string
-      gcp-workload-identity-provider:
-        required: true
-        type: string
-      gcp-service-account:
-        required: true
-        type: string
-      vercel-org-id:
-        required: true
-        type: string
-      vercel-project-id:
-        required: true
-        type: string
-      vercel-project-name:
-        required: true
-        type: string
-    
+
     secrets:
       VERCEL_TOKEN:
         description: Vercel Authentication Token
         required: true
 
-env:
-  EVIDENCE_SOURCE__mathews_recurring_revenue__location: US
-  EVIDENCE_SOURCE__mathews_recurring_revenue__authenticator: gcloud-cli
-  EVIDENCE_SOURCE__mathews_recurring_revenue__project_id: ${{ inputs.gcp-project-id }}
-  EVIDENCE_VAR__access_policy: pub
-
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}-${{ inputs.gcp-project-id }}
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ inputs.environment }}
   cancel-in-progress: true
 
 jobs:
   evidence-deploy:
     runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+
+    env:
+      EVIDENCE_SOURCE__mathews_recurring_revenue__location: US
+      EVIDENCE_SOURCE__mathews_recurring_revenue__authenticator: gcloud-cli
+      EVIDENCE_SOURCE__mathews_recurring_revenue__project_id: ${{ vars.GCP_PROJECT_ID }}
+      EVIDENCE_VAR__access_policy: pub
 
     permissions:
       contents: read
@@ -54,9 +40,9 @@ jobs:
 
       - uses: ./.github/actions/gcp-authenticate
         with:
-          gcp-project-id: ${{ inputs.gcp-project-id }}
-          gcp-workload-identity-provider: ${{ inputs.gcp-workload-identity-provider }}
-          gcp-service-account: ${{ inputs.gcp-service-account }}
+          gcp-project-id: ${{ vars.GCP_PROJECT_ID }}
+          gcp-workload-identity-provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          gcp-service-account: ${{ vars.GCP_EVIDENCE_SERVICE_ACCOUNT }}
 
       - name: Setup Node.js and Cache NPM Dependencies
         uses: actions/setup-node@v6
@@ -80,7 +66,7 @@ jobs:
             evidence/.vercel/output
           key: >
             evidence-
-            ${{ inputs.gcp-project-id }}-
+            ${{ vars.GCP_PROJECT_ID }}-
             ${{ hashFiles('evidence/package-lock.json') }}-
             ${{ hashFiles('evidence/**', '!evidence/build/**', '!evidence/.vercel/**', '!evidence/README.md') }}
 
@@ -99,9 +85,9 @@ jobs:
         run: |
           cat << EOF > .vercel/project.json
           {
-            "orgId": "${{ inputs.vercel-org-id }}",
-            "projectId": "${{ inputs.vercel-project-id }}",
-            "projectName": "${{ inputs.vercel-project-name }}"
+            "orgId": "${{ vars.VERCEL_ORG_ID }}",
+            "projectId": "${{ vars.VERCEL_PROJECT_ID }}",
+            "projectName": "${{ vars.VERCEL_PROJECT_NAME }}"
           }
           EOF
 

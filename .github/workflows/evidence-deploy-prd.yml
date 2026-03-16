@@ -10,13 +10,7 @@ on:
 jobs:
   evidence-deploy-prd:
     uses: ./.github/workflows/evidence-deploy.yml
-    environment: prd
     with:
-      gcp-project-id: ${{ vars.GCP_PROJECT_ID }}
-      gcp-workload-identity-provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-      gcp-service-account: ${{ vars.GCP_EVIDENCE_SERVICE_ACCOUNT }}
-      vercel-org-id: ${{ vars.VERCEL_ORG_ID }}
-      vercel-project-id: ${{ vars.VERCEL_PROJECT_ID }}
-      vercel-project-name: ${{ vars.VERCEL_PROJECT_NAME }}
+      environment: prd
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}

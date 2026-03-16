@@ -1,33 +1,22 @@
 on:
   workflow_call:
     inputs:
-      gcp-project-id:
-        required: true
-        type: string
-      gcp-workload-identity-provider:
-        required: true
-        type: string
-      gcp-service-account:
-        required: true
-        type: string
-      gcp-artifacts-bucket:
-        required: true
-        type: string
-      gcp-artifacts-bucket-prd:
+      environment:
         required: true
         type: string
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}-${{ inputs.gcp-project-id }}
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ inputs.environment }}
   cancel-in-progress: true
 
 jobs:
   dbt-validate:
     runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
 
     env:
-      GCP_PROJECT: ${{ inputs.gcp-project-id }}
-      GCP_CLIENT_EMAIL: ${{ inputs.gcp-service-account }}
+      GCP_PROJECT: ${{ vars.GCP_PROJECT_ID }}
+      GCP_CLIENT_EMAIL: ${{ vars.GCP_DBT_PROJECT_SERVICE_ACCOUNT }}
 
     permissions:
       contents: read
@@ -43,10 +32,10 @@ jobs:
 
       - uses: ./.github/actions/dbt-gcp-setup
         with:
-          gcp-project-id: ${{ inputs.gcp-project-id }}
-          gcp-workload-identity-provider: ${{ inputs.gcp-workload-identity-provider }}
-          gcp-service-account: ${{ inputs.gcp-service-account }}
-          gcp-artifacts-bucket-prd: ${{ inputs.gcp-artifacts-bucket-prd }}
+          gcp-project-id: ${{ vars.GCP_PROJECT_ID }}
+          gcp-workload-identity-provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          gcp-service-account: ${{ vars.GCP_DBT_PROJECT_SERVICE_ACCOUNT }}
+          gcp-artifacts-bucket-prd: ${{ vars.GCP_ARTIFACTS_BUCKET_PRD }}
 
       - name: Run Unit Tests
         run: |
@@ -62,10 +51,11 @@ jobs:
   dbt-run:
     needs: dbt-validate
     runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
 
     env:
-      GCP_PROJECT: ${{ inputs.gcp-project-id }}
-      GCP_CLIENT_EMAIL: ${{ inputs.gcp-service-account }}
+      GCP_PROJECT: ${{ vars.GCP_PROJECT_ID }}
+      GCP_CLIENT_EMAIL: ${{ vars.GCP_DBT_PROJECT_SERVICE_ACCOUNT }}
 
     permissions:
       contents: read
@@ -81,10 +71,10 @@ jobs:
 
       - uses: ./.github/actions/dbt-gcp-setup
         with:
-          gcp-project-id: ${{ inputs.gcp-project-id }}
-          gcp-workload-identity-provider: ${{ inputs.gcp-workload-identity-provider }}
-          gcp-service-account: ${{ inputs.gcp-service-account }}
-          gcp-artifacts-bucket-prd: ${{ inputs.gcp-artifacts-bucket-prd }}
+          gcp-project-id: ${{ vars.GCP_PROJECT_ID }}
+          gcp-workload-identity-provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          gcp-service-account: ${{ vars.GCP_DBT_PROJECT_SERVICE_ACCOUNT }}
+          gcp-artifacts-bucket-prd: ${{ vars.GCP_ARTIFACTS_BUCKET_PRD }}
 
       - name: Run Modified Seeds
         run: |
@@ -105,10 +95,11 @@ jobs:
   dbt-upload-assets:
     needs: dbt-run
     runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
 
     env:
-      GCP_PROJECT: ${{ inputs.gcp-project-id }}
-      GCP_CLIENT_EMAIL: ${{ inputs.gcp-service-account }}
+      GCP_PROJECT: ${{ vars.GCP_PROJECT_ID }}
+      GCP_CLIENT_EMAIL: ${{ vars.GCP_DBT_PROJECT_SERVICE_ACCOUNT }}
 
     permissions:
       contents: read
@@ -124,10 +115,10 @@ jobs:
 
       - uses: ./.github/actions/dbt-gcp-setup
         with:
-          gcp-project-id: ${{ inputs.gcp-project-id }}
-          gcp-workload-identity-provider: ${{ inputs.gcp-workload-identity-provider }}
-          gcp-service-account: ${{ inputs.gcp-service-account }}
-          gcp-artifacts-bucket-prd: ${{ inputs.gcp-artifacts-bucket-prd }}
+          gcp-project-id: ${{ vars.GCP_PROJECT_ID }}
+          gcp-workload-identity-provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          gcp-service-account: ${{ vars.GCP_DBT_PROJECT_SERVICE_ACCOUNT }}
+          gcp-artifacts-bucket-prd: ${{ vars.GCP_ARTIFACTS_BUCKET_PRD }}
 
       - name: Generate Docs
         run: |
@@ -145,22 +136,23 @@ jobs:
         run: |
           gcloud storage cp \
             target/static_index.html \
-            ${{ inputs.gcp-artifacts-bucket }}/target/static_index.html
+            ${{ vars.GCP_ARTIFACTS_BUCKET }}/target/static_index.html
 
       - name: Upload manifest.json
-        if: inputs.gcp-artifacts-bucket == inputs.gcp-artifacts-bucket-prd
+        if: vars.GCP_ARTIFACTS_BUCKET == vars.GCP_ARTIFACTS_BUCKET_PRD
         run: |
           gcloud storage cp \
             target/manifest.json \
-            ${{ inputs.gcp-artifacts-bucket }}/target/manifest.json
+            ${{ vars.GCP_ARTIFACTS_BUCKET }}/target/manifest.json
 
   dbt-deploy:
     needs: dbt-run
     runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
 
     env:
-      GCP_PROJECT: ${{ inputs.gcp-project-id }}
-      GCP_CLIENT_EMAIL: ${{ inputs.gcp-service-account }}
+      GCP_PROJECT: ${{ vars.GCP_PROJECT_ID }}
+      GCP_CLIENT_EMAIL: ${{ vars.GCP_DBT_PROJECT_SERVICE_ACCOUNT }}
 
     permissions:
       contents: read
@@ -176,9 +168,9 @@ jobs:
 
       - uses: ./.github/actions/gcp-authenticate
         with:
-          gcp-project-id: ${{ inputs.gcp-project-id }}
-          gcp-workload-identity-provider: ${{ inputs.gcp-workload-identity-provider }}
-          gcp-service-account: ${{ inputs.gcp-service-account }}
+          gcp-project-id: ${{ vars.GCP_PROJECT_ID }}
+          gcp-workload-identity-provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          gcp-service-account: ${{ vars.GCP_DBT_PROJECT_SERVICE_ACCOUNT }}
 
       - name: Get GCP access token
         id: gcp-token
@@ -196,7 +188,7 @@ jobs:
 
       - name: Generate Docker Metadata
         id: docker-metadata
-        run: echo "image=us-central1-docker.pkg.dev/${{ inputs.gcp-project-id }}/dbt-project/dbt-project:${{ github.event.pull_request.head.sha }}" >> $GITHUB_OUTPUT
+        run: echo "image=us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/dbt-project/dbt-project:${{ github.event.pull_request.head.sha }}" >> $GITHUB_OUTPUT
 
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v6
@@ -210,7 +202,7 @@ jobs:
       - name: Deploy to Cloud Run
         run: |
           DOCKER_IMAGE=${{ steps.docker-metadata.outputs.image }} \
-          GCP_SERVICE_ACCOUNT=${{ inputs.gcp-service-account }} \
+          GCP_SERVICE_ACCOUNT=${{ vars.GCP_DBT_PROJECT_SERVICE_ACCOUNT }} \
           envsubst < job.yaml |
           gcloud run jobs replace \
           --project=${{ env.GCP_PROJECT }} \
