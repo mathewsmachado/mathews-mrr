@@ -44,14 +44,10 @@ jobs:
 
       - name: Run Unit Tests
         run: |
-          if [ ! -f artifacts/manifest.json ]; then
-            uv run dbt test
-          else
-            uv run dbt test \
-              --defer \
-              --state artifacts \
-              --select state:modified,test_type:unit
-          fi
+          uv run dbt test \
+            --defer \
+            --state artifacts \
+            --select state:modified,test_type:unit
 
   dbt-run:
     needs: dbt-validate
@@ -83,24 +79,17 @@ jobs:
 
       - name: Run Modified Seeds
         run: |
-          if [ ! -f artifacts/manifest.json ]; then
-            uv run dbt seed
-          else
-            uv run dbt seed --defer --state artifacts --select state:modified
-          fi
+          uv run dbt seed --defer --state artifacts --select state:modified
 
       - name: Run Modified Models
         run: |
-          if [ ! -f artifacts/manifest.json ]; then
-            uv run dbt run
-          else
-            uv run dbt run --defer --state artifacts --select state:modified
-          fi
+          uv run dbt run --defer --state artifacts --select state:modified
 
   dbt-manifest-upload:
     needs: dbt-run
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
+    if: vars.GCP_ARTIFACTS_BUCKET == vars.GCP_ARTIFACTS_BUCKET_PRD
 
     env:
       GCP_PROJECT: ${{ vars.GCP_PROJECT_ID }}
@@ -126,15 +115,13 @@ jobs:
           gcp-artifacts-bucket-prd: ${{ vars.GCP_ARTIFACTS_BUCKET_PRD }}
 
       - name: Generate manifest.json
-        if: vars.GCP_ARTIFACTS_BUCKET == vars.GCP_ARTIFACTS_BUCKET_PRD
         run: uv run dbt parse
 
       - name: Upload manifest.json
-        if: vars.GCP_ARTIFACTS_BUCKET == vars.GCP_ARTIFACTS_BUCKET_PRD
         run: |
           gcloud storage cp \
             target/manifest.json \
-            ${{ vars.GCP_ARTIFACTS_BUCKET }}/target
+            ${{ vars.GCP_ARTIFACTS_BUCKET_PRD }}/target
 
 
   dbt-docs-deploy:
@@ -167,16 +154,12 @@ jobs:
 
       - name: Generate Docs
         run: |
-          if [ ! -f artifacts/manifest.json ]; then
-            uv run dbt docs generate --static
-          else
-            uv run dbt docs generate \
-              --static \
-              --no-compile \
-              --defer \
-              --state artifacts \
-              --select state:modified
-          fi
+          uv run dbt docs generate \
+            --static \
+            --no-compile \
+            --defer \
+            --state artifacts \
+            --select state:modified
 
       - name: Deploy to Vercel
         uses: ./.github/actions/vercel-deploy
