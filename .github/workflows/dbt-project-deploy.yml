@@ -97,6 +97,46 @@ jobs:
             uv run dbt run --defer --state artifacts --select state:modified
           fi
 
+  dbt-manifest-upload:
+    needs: dbt-run
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+
+    env:
+      GCP_PROJECT: ${{ vars.GCP_PROJECT_ID }}
+      GCP_CLIENT_EMAIL: ${{ vars.GCP_SERVICE_ACCOUNT_DBT_PROJECT }}
+
+    permissions:
+      contents: read
+      id-token: write
+
+    defaults:
+      run:
+        working-directory: dbt_project
+
+    steps:
+      - name: Clone Repository
+        uses: actions/checkout@v5
+
+      - uses: ./.github/actions/dbt-gcp-setup
+        with:
+          gcp-project-id: ${{ vars.GCP_PROJECT_ID }}
+          gcp-workload-identity-provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          gcp-service-account: ${{ vars.GCP_SERVICE_ACCOUNT_DBT_PROJECT }}
+          gcp-artifacts-bucket-prd: ${{ vars.GCP_ARTIFACTS_BUCKET_PRD }}
+
+      - name: Generate manifest.json
+        if: vars.GCP_ARTIFACTS_BUCKET == vars.GCP_ARTIFACTS_BUCKET_PRD
+        run: uv run dbt parse
+
+      - name: Upload manifest.json
+        if: vars.GCP_ARTIFACTS_BUCKET == vars.GCP_ARTIFACTS_BUCKET_PRD
+        run: |
+          gcloud storage cp \
+            target/manifest.json \
+            ${{ vars.GCP_ARTIFACTS_BUCKET }}/target
+
+
   dbt-docs-deploy:
     needs: dbt-run
     runs-on: ubuntu-latest
@@ -210,14 +250,3 @@ jobs:
           --project=${{ env.GCP_PROJECT }} \
           --region=us-central1 \
           -
-
-      - name: Generate manifest.json
-        if: vars.GCP_ARTIFACTS_BUCKET == vars.GCP_ARTIFACTS_BUCKET_PRD
-        run: dbt parse
-
-      - name: Upload manifest.json
-        if: vars.GCP_ARTIFACTS_BUCKET == vars.GCP_ARTIFACTS_BUCKET_PRD
-        run: |
-          gcloud storage cp \
-            target/manifest.json \
-            ${{ vars.GCP_ARTIFACTS_BUCKET }}/target
