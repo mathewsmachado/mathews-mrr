@@ -156,7 +156,6 @@ jobs:
         run: |
           uv run dbt docs generate \
             --static \
-            --no-compile \
             --defer \
             --state artifacts \
             --select state:modified
